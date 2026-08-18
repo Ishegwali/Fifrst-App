@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A powerful, elegant Todo & Task Management Dashboard featuring real-time analytics, category organization, subtasks, and WebStorage persistence.">
+    <title>TaskPulse - Todo App Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
+                <div class="brand-text">
+                    <h2>TaskPulse</h2>
+                    <span class="brand-badge">PRO</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Overview</div>
+                <button class="nav-item active" id="nav-all-tasks" onclick="switchNav('all')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                    <span>All Tasks</span>
+                    <span class="nav-count" id="nav-count-all">0</span>
+                </button>
+                <button class="nav-item" id="nav-today-tasks" onclick="switchNav('today')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Due Today</span>
+                    <span class="nav-count" id="nav-count-today">0</span>
+                </button>
+                <button class="nav-item" id="nav-pending-tasks" onclick="switchNav('pending')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span>Pending</span>
+                    <span class="nav-count" id="nav-count-pending">0</span>
+                </button>
+                <button class="nav-item" id="nav-completed-tasks" onclick="switchNav('completed')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <span>Completed</span>
+                    <span class="nav-count" id="nav-count-completed">0</span>
+                </button>
+
+                <div class="nav-section-title">Categories</div>
+                <div id="sidebar-categories">
+                    <!-- Dynamically rendered categories -->
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="storage-indicator">
+                    <div class="storage-header">
+                        <span>WebStorage Persistence</span>
+                        <span id="storage-status">Active</span>
+                    </div>
+                    <div class="storage-bar"><div class="storage-fill" id="storage-fill"></div></div>
+                </div>
+                <button id="btn-reset-data" onclick="resetToSampleData()" title="Reset to initial sample tasks">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    <span>Reset Demo Data</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Dashboard Content -->
+        <main id="main-content">
+            <!-- Top Bar Header -->
+            <header id="top-header">
+                <div class="header-welcome">
+                    <h1 id="greeting-title">Welcome back, Producer 👋</h1>
+                    <p id="current-date-display">Today is Wednesday, Aug 19</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-primary" id="btn-open-add-modal" onclick="openTaskModal()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>New Task</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Metrics & Analytics Section -->
+            <section id="metrics-grid">
+                <!-- Stat Card 1 -->
+                <div class="stat-card">
+                    <div class="stat-icon icon-blue">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Total Tasks</span>
+                        <h3 class="stat-value" id="stat-total">0</h3>
+                        <span class="stat-subtext" id="stat-total-sub">0 created total</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 2 -->
+                <div class="stat-card">
+                    <div class="stat-icon icon-amber">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Pending</span>
+                        <h3 class="stat-value" id="stat-pending">0</h3>
+                        <span class="stat-subtext" id="stat-pending-sub">0 high priority</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 3 -->
+                <div class="stat-card">
+                    <div class="stat-icon icon-emerald">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Completed</span>
+                        <h3 class="stat-value" id="stat-completed">0</h3>
+                        <span class="stat-subtext" id="stat-completed-sub">Great velocity!</span>
+                    </div>
+                </div>
+
+                <!-- Stat Card 4 - Progress Ring -->
+                <div class="stat-card stat-progress-card">
+                    <div class="progress-ring-container">
+                        <svg class="progress-ring" width="70" height="70">
+                            <circle class="progress-ring-bg" stroke="rgba(255, 255, 255, 0.08)" stroke-width="6" fill="transparent" r="28" cx="35" cy="35"/>
+                            <circle class="progress-ring-circle" id="productivity-ring" stroke="#6366f1" stroke-width="6" stroke-linecap="round" fill="transparent" r="28" cx="35" cy="35" stroke-dasharray="175.929" stroke-dashoffset="175.929"/>
+                        </svg>
+                        <span class="ring-percentage" id="stat-percentage">0%</span>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">Productivity Rate</span>
+                        <h3 class="stat-value" id="stat-score-text">0% Done</h3>
+                        <span class="stat-subtext">Completion progress</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Toolbar (Search, Filter, Sort, View Toggle) -->
+            <section id="toolbar-section">
+                <div class="toolbar-search">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" id="search-input" placeholder="Search tasks by title or tag..." oninput="handleSearchInput(event)">
+                    <button class="clear-search-btn" id="btn-clear-search" onclick="clearSearch()" style="display: none;">✕</button>
+                </div>
+
+                <div class="toolbar-controls">
+                    <!-- Category Selector -->
+                    <select id="filter-category" onchange="handleCategoryFilter(event)" aria-label="Filter by Category">
+                        <option value="all">All Categories</option>
+                        <option value="Work">💼 Work</option>
+                        <option value="Personal">🏠 Personal</option>
+                        <option value="Coding">💻 Coding</option>
+                        <option value="Health">🧘 Health</option>
+                        <option value="Finance">💰 Finance</option>
+                    </select>
+
+                    <!-- Priority Selector -->
+                    <select id="filter-priority" onchange="handlePriorityFilter(event)" aria-label="Filter by Priority">
+                        <option value="all">All Priorities</option>
+                        <option value="High">🔴 High Priority</option>
+                        <option value="Medium">🟡 Medium Priority</option>
+                        <option value="Low">🟢 Low Priority</option>
+                    </select>
+
+                    <!-- Sort Options -->
+                    <select id="sort-by" onchange="handleSortChange(event)" aria-label="Sort Tasks By">
+                        <option value="dueDate">📅 Sort: Due Date</option>
+                        <option value="priority">⚡ Sort: Priority</option>
+                        <option value="created">🕒 Sort: Created Date</option>
+                        <option value="alphabetical">🔤 Sort: Alphabetical</option>
+                    </select>
+
+                    <!-- Layout Toggle -->
+                    <div class="view-toggle">
+                        <button id="view-grid" class="view-btn active" onclick="setViewMode('grid')" title="Grid View">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        </button>
+                        <button id="view-list" class="view-btn" onclick="setViewMode('list')" title="List View">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Quick Bulk Actions Dropdown -->
+                    <button class="btn-secondary" id="btn-clear-completed" onclick="clearCompletedTasks()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        <span>Clear Completed</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Category Breakdown Bar -->
+            <section id="category-bar-container">
+                <div class="section-subtitle">Category Distribution</div>
+                <div class="category-segment-bar" id="category-segment-bar">
+                    <!-- Dynamic segments filled by JS -->
+                </div>
+            </section>
+
+            <!-- Tasks Display Area -->
+            <section id="tasks-container" class="grid-mode">
+                <!-- Dynamic Task Cards Rendered Here -->
+            </section>
+
+            <!-- Empty State Display -->
+            <div id="empty-state" style="display: none;">
+                <div class="empty-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <h3 id="empty-title">All caught up!</h3>
+                <p id="empty-desc">No tasks match your current filter. Create a new task to boost your productivity.</p>
+                <button class="btn-primary" onclick="openTaskModal()">Create New Task</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create / Edit Task Modal Overlay -->
+    <div id="task-modal" class="modal-overlay" onclick="closeModalOnBackdrop(event)">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Create New Task</h3>
+                <button class="modal-close-btn" onclick="closeTaskModal()">✕</button>
+            </div>
+            <form id="task-form" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="task-id">
+
+                <div class="form-group">
+                    <label for="task-title-input">Task Title *</label>
+                    <input type="text" id="task-title-input" placeholder="e.g., Finalize project architecture & docs" required maxlength="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="task-desc-input">Description</label>
+                    <textarea id="task-desc-input" rows="3" placeholder="Add detailed context, links, or specific requirements..."></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group flex-1">
+                        <label for="task-category-select">Category</label>
+                        <select id="task-category-select">
+                            <option value="Work">💼 Work</option>
+                            <option value="Personal">🏠 Personal</option>
+                            <option value="Coding">💻 Coding</option>
+                            <option value="Health">🧘 Health</option>
+                            <option value="Finance">💰 Finance</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group flex-1">
+                        <label for="task-priority-select">Priority</label>
+                        <select id="task-priority-select">
+                            <option value="High">🔴 High Priority</option>
+                            <option value="Medium" selected>🟡 Medium Priority</option>
+                            <option value="Low">🟢 Low Priority</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="task-duedate-input">Due Date *</label>
+                    <input type="date" id="task-duedate-input" required>
+                </div>
+
+                <!-- Subtasks Builder Section -->
+                <div class="form-group">
+                    <label>Subtasks / Checklist</label>
+                    <div class="subtask-input-wrapper">
+                        <input type="text" id="subtask-builder-input" placeholder="Add subtask step (press Enter)" onkeydown="handleAddSubtaskKey(event)">
+                        <button type="button" class="btn-subtask-add" onclick="addSubtaskFromInput()">Add</button>
+                    </div>
+                    <ul id="subtask-builder-list" class="subtask-builder-list">
+                        <!-- Temporary subtasks rendered here -->
+                    </ul>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeTaskModal()">Cancel</button>
+                    <button type="submit" class="btn-primary" id="btn-save-task">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
